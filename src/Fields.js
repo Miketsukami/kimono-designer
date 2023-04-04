@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { SketchPicker } from 'react-color';
 import { Form, InputGroup, Button } from 'react-bootstrap';
@@ -11,12 +11,16 @@ export function ColorPicker ({ defaultValue, onChange }) {
     const handleClick = () => setVisible(!visible)
     const handleClose = () => setVisible(false)
 
-    const handleChange = (color) => {
-        setColor(color.hex)
+    const handleChange = (event) => {
+        setColor(event.hex)
         if (onChange) {
-            onChange(color.hex)
+            onChange(event.hex)
         }
     }
+
+    useEffect(() => {
+        setColor(defaultValue)
+    }, [defaultValue])
 
     return (
         <div className='ColorPicker'>
@@ -38,13 +42,24 @@ export function ColorPicker ({ defaultValue, onChange }) {
 
 
 export function Field ({ label, header, withCheckbox, defaultChecked, onChange, children }) {
+    const [checked, setChecked] = useState(defaultChecked)
+    
+    const handleChange = (event) => {
+        setChecked(event.target.checked)
+        onChange(checked)
+    }
+
+    useEffect(() => {
+        setChecked(defaultChecked)
+    }, [defaultChecked])
+
     return (
         <Form.Group className={ header ? 'my-2' : '' }>
             <Form.Label className={ header ? 'fw-bold' : '' }>
                 { header || label }
                 {
                     withCheckbox ? (
-                        <Form.Check type='checkbox' inline className='ms-2' defaultChecked={defaultChecked} onChange={(e) => onChange(e.target.checked)} />
+                        <Form.Check type='checkbox' inline className='ms-2' checked={ checked } onChange={ handleChange } />
                     ) : null
                 }
             </Form.Label>

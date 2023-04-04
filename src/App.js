@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { Container, Row, Col, Navbar, Nav, NavDropdown } from 'react-bootstrap';
-import { BsFiletypeSvg, BsFillCloudDownloadFill } from "react-icons/bs";
+import { BsFiletypeJson, BsFiletypeSvg, BsFillCloudUploadFill, BsFillCloudDownloadFill } from "react-icons/bs";
 
 import { Background, Haneri, Kimono, Obi, Hakama, Haori } from './Clothing';
 import { Field, ColorPicker } from './Fields';
@@ -47,6 +47,53 @@ export default function App() {
         download('kimono.svg', dstSvg.outerHTML, 'image/svg+xml')
     }
 
+    const dumpJson = () => {
+        const data = {
+            background: background, 
+            haneri: haneri, 
+            obi: obi, 
+            kimono: kimono, 
+            hakama: hakama, 
+            haori: haori
+        }
+
+        download('kimono.json', JSON.stringify(data, null, 4), 'application/json')
+    }
+
+    const loadJson = () => {
+        const element = document.createElement('input')
+        element.type = 'file'
+        element.click()
+        element.onchange = (e) => {
+            const reader=new FileReader();
+            reader.onload = () => {
+                try {
+                    const config = (jsonData => Object.fromEntries(
+                        Object.entries(defaultValues).map(([key, defaultValue]) => {
+                            const updateValue = (jsonSection => Object.fromEntries(
+                                Object.entries(jsonSection).filter(([k]) => k in defaultValue)
+                            ))(jsonData[key] || {})
+
+                            return [key, {...defaultValue, ...updateValue}]
+                        })
+                    ))(JSON.parse(reader.result))
+
+
+                    setBackground(config.background)
+                    setHaneri(config.haneri)
+                    setKimono(config.kimono)
+                    setObi(config.obi)
+                    setHakama(config.hakama)
+                    setHaori(config.haori)
+                } catch (error) {
+                    alert('Error: Could\'nt parse this file as JSON')
+                }
+            }
+
+            reader.readAsText(e.target.files[0]);
+        }
+    }
+
     return (
         <div className='App d-flex vh-100'>
             <Container className='my-4 px-0 bg-white rounded d-flex flex-column'>
@@ -56,6 +103,10 @@ export default function App() {
                         <Nav className='ms-auto'>
                             <NavDropdown title={<><BsFiletypeSvg/> SVG</>}>
                                 <NavDropdown.Item href="#" onClick={saveImage}><BsFillCloudDownloadFill /> Save</NavDropdown.Item>
+                            </NavDropdown>
+                            <NavDropdown title={<><BsFiletypeJson/> JSON</>}>
+                                <NavDropdown.Item href="#" onClick={loadJson}><BsFillCloudUploadFill /> Load</NavDropdown.Item>
+                                <NavDropdown.Item href="#" onClick={dumpJson}><BsFillCloudDownloadFill /> Save</NavDropdown.Item>
                             </NavDropdown>
                         </Nav>
                     </Container>
@@ -78,7 +129,7 @@ export default function App() {
                         </Col>
                         <Col className='mx-2'>
                             <Field header='Haneri'>
-                                <ColorPicker defaultValue={haneri.color} onChange={(v) => setHaneri({...haneri, color: v})} />
+                                <ColorPicker defaultValue={haneri.color} onChange={(v) => setHaneri({...haneri, color: v})}/>
                             </Field>
                             <Field header='Kimono'>
                                 <Row>
