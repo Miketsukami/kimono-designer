@@ -46,7 +46,7 @@ export function Field ({ label, header, withCheckbox, defaultChecked, onChange, 
     
     const handleChange = (event) => {
         setChecked(event.target.checked)
-        onChange(checked)
+        onChange(event.target.checked)
     }
 
     useEffect(() => {
